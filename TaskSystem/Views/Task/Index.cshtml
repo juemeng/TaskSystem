@@ -143,7 +143,7 @@
 @foreach (var item in Model)
 {
     <tr> 
-        <td class="tdtname">@item.TaskId</td> 
+        <td class="tdtname">@item.TaskName</td> 
         <td class="tdowner"><img src="@Url.Content(item.User.IconUrl)" title="@item.User.Name" width="30" height="30"/></td>
         <td class="tddes" title="@item.Description">
             @if (item.Description.Length > 35)

@@ -160,9 +160,9 @@
 Page @(Model.PageCount < Model.PageNumber ? 0 : Model.PageNumber) of @Model.PageCount
 @if (Model.HasPreviousPage)
 {
-    @Html.ActionLink("<<  ", "Index", new { Page = 1 })
+    @Html.ActionLink("<<  ", "ShowUser", new { Page = 1 })
     @Html.Raw("  ")
-    @Html.ActionLink("< Prve", "Index", new { Page = Model.PageNumber - 1 })
+    @Html.ActionLink("< Prve", "ShowUser", new { Page = Model.PageNumber - 1 })
 }
 else
 {
@@ -175,9 +175,9 @@ else
 
 @if (Model.HasNextPage)
 {
-    @Html.ActionLink("Next >", "Index", new { Page = Model.PageNumber + 1 })
+    @Html.ActionLink("Next >", "ShowUser", new { Page = Model.PageNumber + 1 })
     @Html.Raw("  ")
-    @Html.ActionLink("  >>", "Index", new { Page = Model.PageCount })
+    @Html.ActionLink("  >>", "ShowUser", new { Page = Model.PageCount })
 }
 else
 {
