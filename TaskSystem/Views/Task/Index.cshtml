@@ -10,35 +10,53 @@
              $.post(actionurl,map,func);
          }
          function updateTask() {
-                 var data =
-                 {
-                     tdtname: $(this).parents("tr").children(".tdtname").text(),
-                     tdowner: $(this).parents("tr").children(".tdowner").text(),
-                     tddes: $(this).parents("tr").children(".tddes").text(),
-                     tdtime: $(this).parents("tr").children(".tdtime").text(),
-                     taskid: $(this).attr("title")
-                 };
-                 var html = $("#OpenWindow").html();
-                 html = html.replace('id="tname"', "id='tname' value='" + data.tdtname + "'");
-                 html = html.replace('id="owner"', "id='owner' value='" + data.tdowner + "'");
-                 html = html.replace('id="description"', "id='description' value='" + data.tddes + "'");
-                 html = html.replace('id="time"', "id='time' value='" + data.tdtime.replace(" Hour", "") + "'");
+             var trdata =
+             {
+                tdtname: $(this).parents("tr").children(".tdtname").text(),
+                tddes: $(this).parents("tr").children(".tddes").text(),
+                tdowner:$(this).parents("tr").children(".tdowner").children("img").attr("alt"),
+                tdtime: $(this).parents("tr").children(".tdtime").text(),
+                taskid: $(this).attr("title")
+             };
+             var htmlobj = $("#OpenWindow");
+             var sel = htmlobj.children("#tasktable").children().children("#trowner").children("#tdowner").children("#selowner");
+             $.post("/user/UserNameList", function (data) {
+                 sel.empty();
+                 $.each(data, function (i, n) {
+                     if (n == trdata.tdowner) {
+                         sel.append($("<option selected='selected'>" + n + "</option>"));
+                     }
+                     else {
+                         sel.append($("<option>" + n + "</option>"));
+                     }
+                 });
+                 var html = htmlobj.html();
+                 html = html.replace('id="tname"', "id='tname' value='" + trdata.tdtname + "'");
+                 html = html.replace('id="owner"', "id='owner' value='" + trdata.tdowner + "'");
+                 html = html.replace('id="description"', "id='description' value='" + trdata.tddes + "'");
+                 html = html.replace('id="time"', "id='time' value='" + trdata.tdtime.replace(" Hour", "") + "'");
                  $.prompt(html, { top: 300, callback: function (e, v, m, f) {
                      if (v == true) {
-                         var map = { TaskId: data.taskid, TaskName: f.tname, Owner: f.owner, Description: f.description, Time: f.time };
+                         var selval = m.children("#tasktable").children().children("#trowner").children("#tdowner").children("#selowner").children(":selected").val();
+                         var map = { TaskId:trdata.taskid, TaskName: f.tname, Owner: selval, Description: f.description, Time: f.time };
                          insertOrUpdateTask("/task/update", map, function (response) {
-                             if (response == "true") {
-                                 var currenttr = $("a[title='" + data.taskid + "']").parents("tr");
+                             if (response != "") {
+                                 var currenttr = $("a[title='" + trdata.taskid + "']").parents("tr");
                                  currenttr.children(".tdtname").text(map.TaskName);
-                                 currenttr.children(".tdowner").text(map.Owner);
+                                 currenttr.children(".tdowner").children("img").attr("src", response.Icon);
+                                 currenttr.children(".tdowner").children("img").attr("alt", selval);
                                  currenttr.children(".tddes").attr("title", map.Description);
                                  map.Description.length > 35 ? currenttr.children(".tddes").text(map.Description.substr(0, 35) + "...") : currenttr.children(".tddes").text(map.Description);
                                  currenttr.children(".tdtime").text(map.Time + " Hour");
+                             }
+                             else {
+                                 alert("修改失败");
                              }
                          });
                      }
                  }
                  });
+             });
              };
              function deleteTask() {
                  var ctr = $(this).parents("tr");
@@ -87,25 +105,26 @@
                              });
                          }
                      }
-             $(function () {
-                 //新增
-                 $("#addtask").click(function () {
-                     var htmlobj = $("#OpenWindow");
-                     var sel = htmlobj.children("#tasktable").children().children("#trowner").children("#tdowner").children("#selowner");
-                     $.post("/user/UserNameList", function (data) {
-                         $.each(data, function (i, n) {
-                             sel.append($("<option>" + n + "</option>"));
+                     $(function () {
+                         //新增
+                         $("#addtask").click(function () {
+                             var htmlobj = $("#OpenWindow");
+                             var sel = htmlobj.children("#tasktable").children().children("#trowner").children("#tdowner").children("#selowner");
+                             $.post("/user/UserNameList", function (data) {
+                                 sel.empty();
+                                 $.each(data, function (i, n) {
+                                     sel.append($("<option>" + n + "</option>"));
+                                 });
+                                 $.prompt(htmlobj.html(), { top: 300, callback: promptCallBack });
+                             });
                          });
-                         $.prompt(htmlobj.html(), { top: 300, callback: promptCallBack });
+                         //修改
+                         $("a[rel='update']").click(updateTask);
+                         //删除
+                         $("a[rel='delete']").click(deleteTask);
+                         $("#mytable tr:even").css("background-color", "#CAE8EA");
+                         $(".tddes").poshytip();
                      });
-                 });
-                 //修改
-                 $("a[rel='update']").click(updateTask);
-                 //删除
-                 $("a[rel='delete']").click(deleteTask);
-                 $("#mytable tr:even").css("background-color", "#CAE8EA");
-                 $(".tddes").poshytip();
-             });
     </script>
 }
 <table id="mytable" cellspacing="0"> 
@@ -121,7 +140,7 @@
 {
     <tr> 
         <td class="tdtname">@item.TaskName</td> 
-        <td class="tdowner"><img src="@Url.Content(item.User.IconUrl)" width="30" height="30"/></td>
+        <td class="tdowner"><img src="@Url.Content(item.User.IconUrl)" alt="@item.User.Name" width="30" height="30"/></td>
         <td class="tddes" title="@item.Description">
             @if (item.Description.Length > 35)
             {

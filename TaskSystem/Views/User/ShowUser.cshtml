@@ -103,7 +103,7 @@
                         }
                     },
                     state1: {
-                        html: '<div id="head" style="margin:0 auto;color:#ff8000;font-family:微软雅黑">选择用户头像</div><hr/><form id="upuser" action="/user/InsertOrUpdate" method="post" enctype="multipart/form-data"><table id="tasktable"><tr><td><label for="">User Photo:</label></td><td><input type="file" name="photo" id="photo" /></td><td></td></tr></table></form>',
+                        html: '<div id="head" style="margin:0 auto;color:#ff8000;font-family:微软雅黑">选择用户头像</div><hr/><form id="upuser" action="/user/InsertOrUpdate" method="post" enctype="multipart/form-data"><table id="tasktable"><tr id="trimg"><td colspan="2"><img src="" width="30" height="30" /></td></tr><tr><td><label for="">User Photo:</label></td><td><input type="file" name="photo" id="photo" /></td><td></td></tr></table></form>',
                         buttons: { Back: -1, Ok: 0 },
                         focus: 1,
                         top: 300,
@@ -114,7 +114,6 @@
                                         //$prompt.close();
                                         if (responseText != "false") {
                                             var resdata = eval("(" + responseText + ")");
-                                            alert(f.name);
                                             var trhtml = '<tr><td class="tdname">' + f.name + '</td><td class="tdemail">' + f.email + '</td><td class="tdphoto"><img src="' + resdata.Icon + '" width="30" height="30"/></td><td class="tdupdate"><a href="#" rel="update" title="' + resdata.Id + '">修改</a></td><td class="tddel"><a href="#" rel="delete" title="' + resdata.Id + '">删除</a></td></tr>';
                                             var tr = $(trhtml);
                                             tr.children(".tdupdate").children("a").click(updateUser);
@@ -127,7 +126,6 @@
                                         }
                                     }
                                 });
-
                             }
                             else if (v = -1) {
                                 $.prompt.goToState('state0');
@@ -162,7 +160,7 @@
 </table>
 <div id="info">
     <span class="color4">欢迎您登陆(Admin)：@ViewBag.LoginName</span>
-    <span class="color3"><a href="#" id="adduser">添加用户</a> | @Html.ActionLink("登出", "Logout", "User")</span>
+    <span class="color3">@Html.ActionLink("返回", "Index", "Task") | <a href="#" id="adduser">添加用户</a> | @Html.ActionLink("登出", "Logout", "User")</span>
 </div>
 <div id="OpenWindow" style="display:none;text-align:center">
         <div id="head" style="margin:0 auto;color:#ff8000;font-family:微软雅黑">添加新用户</div>

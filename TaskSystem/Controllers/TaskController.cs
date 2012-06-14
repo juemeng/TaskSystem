@@ -50,9 +50,10 @@ namespace TaskSystem.Controllers
         }
 
         [CustomAuthorizeAttribute]
-        public string Update(Task t)
+        [HttpPost]
+        public JsonResult Update(Task t)
         {
-            string ownerName = Request.QueryString["Owner"];
+            string ownerName = Request.Params["Owner"];
             User user = _userrepository.FindUserByName(ownerName);
             if (user != null && !string.IsNullOrEmpty(t.TaskName) && !string.IsNullOrEmpty(t.Description) && !string.IsNullOrEmpty(t.Time))
             {
@@ -60,11 +61,11 @@ namespace TaskSystem.Controllers
                 t.Time += " Hour";
                 _taskrepository.InsertOrUpdate(t);
                 _taskrepository.Save();
-                return "true";
+                return Json(new { Icon = user.IconUrl});
             }
             else
             {
-                return "false";
+                return null;
             }
         }
 
