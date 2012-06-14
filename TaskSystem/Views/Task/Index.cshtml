@@ -9,6 +9,7 @@
          function insertOrUpdateTask(actionurl, map, func) {
              $.post(actionurl,map,func);
          }
+
          function updateTask() {
              var trdata =
              {
@@ -57,7 +58,8 @@
                  }
                  });
              });
-             };
+     };
+
              function deleteTask() {
                  var ctr = $(this).parents("tr");
                  $.get("/task/delete", { TaskId: $(this).attr("title") }, function (response) {
@@ -66,6 +68,7 @@
                      }
                  });
              }
+
              function promptCallBack(e, v, m, f) {
                  if (v == true) {
                      var selval = m.children("#tasktable").children().children("#trowner").children("#tdowner").children("#selowner").children(":selected").val();
@@ -105,8 +108,9 @@
                              });
                          }
                      }
+
                      $(function () {
-                         //新增
+                         
                          $("#addtask").click(function () {
                              var htmlobj = $("#OpenWindow");
                              var sel = htmlobj.children("#tasktable").children().children("#trowner").children("#tdowner").children("#selowner");
@@ -118,9 +122,9 @@
                                  $.prompt(htmlobj.html(), { top: 300, callback: promptCallBack });
                              });
                          });
-                         //修改
+                         
                          $("a[rel='update']").click(updateTask);
-                         //删除
+                         
                          $("a[rel='delete']").click(deleteTask);
                          $("#mytable tr:even").css("background-color", "#CAE8EA");
                          $(".tddes").poshytip();

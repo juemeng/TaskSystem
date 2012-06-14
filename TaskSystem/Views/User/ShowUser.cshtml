@@ -1,4 +1,4 @@
-﻿@model IEnumerable<TaskSystem.Models.DAL.User>
+﻿@model PagedList.PagedList<TaskSystem.Models.DAL.User>
 
 @{
     ViewBag.Title = "用户列表";
@@ -8,7 +8,6 @@
 {
     <script src="../../Scripts/jquery.form.js" type="text/javascript"></script>
     <script type="text/javascript">
-        //修改
         function updateUser() {
             var firsthtml = $("#OpenWindow").html();
             var uid = $(this).attr("title");
@@ -69,7 +68,7 @@
             };
             $.prompt(states);
         }
-        //删除
+        
         function deleteUser() {
             var ctr = $(this).parents("tr");
             $.get("/user/delete?id=" + $(this).attr("title"), function (response) {
@@ -78,11 +77,11 @@
         }
         $(function () {
             $("#mytable tr:even").css("background-color", "#CAE8EA");
-            //删除
+            
             $("a[rel='delete']").click(deleteUser);
-            //修改
+            
             $("a[rel='update']").click(updateUser);
-            //添加
+            
             $("#adduser").click(function () {
                 var firsthtml = $("#OpenWindow").html();
                 var statesdemo = {
@@ -157,6 +156,36 @@
    </tr>
 }
 </table>
+<div id="page">
+Page @(Model.PageCount < Model.PageNumber ? 0 : Model.PageNumber) of @Model.PageCount
+@if (Model.HasPreviousPage)
+{
+    @Html.ActionLink("<<  ", "Index", new { Page = 1 })
+    @Html.Raw("  ")
+    @Html.ActionLink("< Prve", "Index", new { Page = Model.PageNumber - 1 })
+}
+else
+{
+    @:<<
+    @Html.Raw("  ")
+    @:< Prev
+}
+
+@Html.Raw("    ")
+
+@if (Model.HasNextPage)
+{
+    @Html.ActionLink("Next >", "Index", new { Page = Model.PageNumber + 1 })
+    @Html.Raw("  ")
+    @Html.ActionLink("  >>", "Index", new { Page = Model.PageCount })
+}
+else
+{
+    @:Next>
+    @Html.Raw("  ")
+    @:>>
+}
+</div>
 <div id="info">
     <span class="color4">欢迎您登陆(Admin)：@ViewBag.LoginName</span>
     <span class="color3">@Html.ActionLink("返回", "Index", "Task") | <a href="#" id="adduser">添加用户</a> | @Html.ActionLink("登出", "Logout", "User")</span>

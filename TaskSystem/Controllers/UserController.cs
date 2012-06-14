@@ -36,11 +36,13 @@ namespace TaskSystem.Controllers
             if (user == null)
             {
                 ViewBag.ErrorMessage = "用户名或密码错误，请检查！";
+
                 return View();
             }
             else
             {
                 Session["User"] = user;
+
                 return RedirectToAction("Index", "Task");
             }
         }
@@ -50,7 +52,7 @@ namespace TaskSystem.Controllers
         public ActionResult ShowUser(int? page)
         {
             ViewBag.LoginName = (Session["User"] as User).Name;
-            var model = _repository.All().ToList();
+            var model = _repository.All().OrderBy(u => u.Id);
             int pageIndex = page ?? 1;
 
             return View(model.ToPagedList(pageIndex,DefaulePageSize));
@@ -58,13 +60,16 @@ namespace TaskSystem.Controllers
 
 
         [HttpPost]
+        [AdminAuthorize]
         public JsonResult UserNameList()
         {
             var userNames = _repository.GetNames();
+
             return Json(userNames);
         }
 
 
+        [AdminAuthorize]
         public string Delete(int id)
         {
             var user = _repository.Find(id);
@@ -72,6 +77,7 @@ namespace TaskSystem.Controllers
             System.IO.File.Delete(path);
             _repository.Delete(id);
             _repository.Save();
+
             return "true";
         }
 
@@ -79,11 +85,13 @@ namespace TaskSystem.Controllers
         public ActionResult Logout()
         {
             Session["User"] = null;
+
             return RedirectToAction("Login");
         }
 
 
         [HttpPost]
+        [AdminAuthorize]
         public string InsertOrUpdate(User user)
         {
             int id = 0;
@@ -119,6 +127,7 @@ namespace TaskSystem.Controllers
                     JavaScriptSerializer js = new JavaScriptSerializer();
                     return js.Serialize(new { Icon = "/content/UserIcon/" + photourl, Id = id });
                 }
+
                 return "false";
             }
         }
