@@ -6,6 +6,7 @@ using System.Web.Mvc;
 using TaskSystem.Models;
 using TaskSystem.Repository;
 using TaskSystem.Models.DAL;
+using PagedList;
 
 namespace TaskSystem.Controllers
 {
@@ -14,6 +15,8 @@ namespace TaskSystem.Controllers
         ITaskRepository _taskrepository;
         IUserRepository _userrepository;
 
+        private const int DefaultPageSize = 5;
+
         public TaskController(ITaskRepository taskrepository,IUserRepository userrepository)
         {
             _taskrepository = taskrepository;
@@ -21,12 +24,14 @@ namespace TaskSystem.Controllers
         }
         
         [CustomAuthorizeAttribute]
-        public ActionResult Index()
+        public ActionResult Index(int? page)
         {
-            var model = _taskrepository.All().ToList();
+            var model = _taskrepository.All().OrderBy(u => u.TaskId);
             ViewBag.LoginName = (Session["User"] as User).Name;
             ViewBag.IsAdmin = (Session["User"] as User).IsAdmin;
-            return View(model);
+            int pageIndex = page ?? 1;
+
+            return View(model.ToPagedList(pageIndex,DefaultPageSize));
         }
 
         [CustomAuthorizeAttribute]

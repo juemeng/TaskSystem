@@ -8,12 +8,15 @@ using System.Web.Mvc;
 using TaskSystem.Models;
 using TaskSystem.Models.DAL;
 using TaskSystem.Repository;
+using PagedList;
 
 namespace TaskSystem.Controllers
 {
     public class UserController : Controller
     {
         IUserRepository _repository;
+
+        private const int DefaulePageSize = 5;
 
         public UserController(IUserRepository repository)
         {
@@ -25,7 +28,7 @@ namespace TaskSystem.Controllers
             return View();
         }
 
-        //登陆验证
+
         [HttpPost]
         public ActionResult Login(User u)
         {
@@ -42,16 +45,18 @@ namespace TaskSystem.Controllers
             }
         }
 
-        //显示用户列表
+
         [AdminAuthorize]
-        public ActionResult ShowUser()
+        public ActionResult ShowUser(int? page)
         {
             ViewBag.LoginName = (Session["User"] as User).Name;
-            var model = _repository.All();
-            return View(model);
+            var model = _repository.All().ToList();
+            int pageIndex = page ?? 1;
+
+            return View(model.ToPagedList(pageIndex,DefaulePageSize));
         }
 
-        //获取用户名称列表
+
         [HttpPost]
         public JsonResult UserNameList()
         {
@@ -59,7 +64,7 @@ namespace TaskSystem.Controllers
             return Json(userNames);
         }
 
-        //删除
+
         public string Delete(int id)
         {
             var user = _repository.Find(id);
@@ -70,14 +75,14 @@ namespace TaskSystem.Controllers
             return "true";
         }
 
-        //登出
+
         public ActionResult Logout()
         {
             Session["User"] = null;
             return RedirectToAction("Login");
         }
 
-        //添加或修改
+
         [HttpPost]
         public string InsertOrUpdate(User user)
         {

@@ -1,4 +1,4 @@
-﻿@model IEnumerable<TaskSystem.Models.DAL.Task>
+﻿@model PagedList.PagedList<TaskSystem.Models.DAL.Task>
 @{
     ViewBag.Title = "任务列表";
     ViewBag.Message = "任务列表";
@@ -14,7 +14,7 @@
              {
                 tdtname: $(this).parents("tr").children(".tdtname").text(),
                 tddes: $(this).parents("tr").children(".tddes").text(),
-                tdowner:$(this).parents("tr").children(".tdowner").children("img").attr("alt"),
+                tdowner:$(this).parents("tr").children(".tdowner").children("img").attr("title"),
                 tdtime: $(this).parents("tr").children(".tdtime").text(),
                 taskid: $(this).attr("title")
              };
@@ -44,7 +44,7 @@
                                  var currenttr = $("a[title='" + trdata.taskid + "']").parents("tr");
                                  currenttr.children(".tdtname").text(map.TaskName);
                                  currenttr.children(".tdowner").children("img").attr("src", response.Icon);
-                                 currenttr.children(".tdowner").children("img").attr("alt", selval);
+                                 currenttr.children(".tdowner").children("img").attr("title", selval);
                                  currenttr.children(".tddes").attr("title", map.Description);
                                  map.Description.length > 35 ? currenttr.children(".tddes").text(map.Description.substr(0, 35) + "...") : currenttr.children(".tddes").text(map.Description);
                                  currenttr.children(".tdtime").text(map.Time + " Hour");
@@ -139,8 +139,8 @@
 @foreach (var item in Model)
 {
     <tr> 
-        <td class="tdtname">@item.TaskName</td> 
-        <td class="tdowner"><img src="@Url.Content(item.User.IconUrl)" alt="@item.User.Name" width="30" height="30"/></td>
+        <td class="tdtname">@item.TaskId</td> 
+        <td class="tdowner"><img src="@Url.Content(item.User.IconUrl)" title="@item.User.Name" width="30" height="30"/></td>
         <td class="tddes" title="@item.Description">
             @if (item.Description.Length > 35)
             {
@@ -157,6 +157,37 @@
    </tr>
 }
 </table>
+<br/>
+<div id="page">
+Page @(Model.PageCount < Model.PageNumber ? 0 : Model.PageNumber) of @Model.PageCount
+@if (Model.HasPreviousPage)
+{
+    @Html.ActionLink("<<  ", "Index", new { Page = 1 })
+    @Html.Raw("  ")
+    @Html.ActionLink("< Prve", "Index", new { Page = Model.PageNumber - 1 })
+}
+else
+{
+    @:<<
+    @Html.Raw("  ")
+    @:< Prev
+}
+
+@Html.Raw("    ")
+
+@if (Model.HasNextPage)
+{
+    @Html.ActionLink("Next >", "Index", new { Page = Model.PageNumber + 1 })
+    @Html.Raw("  ")
+    @Html.ActionLink("  >>", "Index", new { Page = Model.PageCount })
+}
+else
+{
+    @:Next>
+    @Html.Raw("  ")
+    @:>>
+}
+</div>
 <div id="info">
 @if (ViewBag.IsAdmin)
 {

@@ -111,7 +111,6 @@
                             if (v == 0) {
                                 $("#upuser").ajaxSubmit({ success:
                                     function (responseText, statusText, xhr, $form) {
-                                        //$prompt.close();
                                         if (responseText != "false") {
                                             var resdata = eval("(" + responseText + ")");
                                             var trhtml = '<tr><td class="tdname">' + f.name + '</td><td class="tdemail">' + f.email + '</td><td class="tdphoto"><img src="' + resdata.Icon + '" width="30" height="30"/></td><td class="tdupdate"><a href="#" rel="update" title="' + resdata.Id + '">修改</a></td><td class="tddel"><a href="#" rel="delete" title="' + resdata.Id + '">删除</a></td></tr>';
