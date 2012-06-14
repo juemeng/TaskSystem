@@ -1,0 +1,187 @@
+﻿@model IEnumerable<TaskSystem.Models.DAL.User>
+
+@{
+    ViewBag.Title = "用户列表";
+    ViewBag.Message = "用户列表";
+}
+@section scriptadd
+{
+    <script src="../../Scripts/jquery.form.js" type="text/javascript"></script>
+    <script type="text/javascript">
+        //修改
+        function updateUser() {
+            var firsthtml = $("#OpenWindow").html();
+            var uid = $(this).attr("title");
+            var data =
+                {
+                    tdname: $(this).parents("tr").children(".tdname").text(),
+                    tdemail: $(this).parents("tr").children(".tdemail").text()
+                };
+            firsthtml = firsthtml.replace('id="name"', "id='name' value='" + data.tdname + "'");
+            firsthtml = firsthtml.replace('id="password"', "id='password' value='*******'");
+            firsthtml = firsthtml.replace('id="email"', "id='email' value='" + data.tdemail + "'");
+            var states = {
+                state0: {
+                    html: firsthtml,
+                    buttons: { Next: true },
+                    focus: 1,
+                    submit: function (e, v, m, f) {
+                        if (!v) return true;
+                        else
+                            $.post("/user/InsertOrUpdate", { id: uid, name: f.name, password: f.password, email: f.email }, function (data) {
+                                if (data == "true") {
+                                    $.prompt.goToState('state1');
+                                }
+                            });
+                        return false;
+                    }
+                },
+                state1: {
+                    html: '<div id="head" style="margin:0 auto;color:#ff8000;font-family:微软雅黑">选择用户头像</div><hr/><form id="upuser" action="/user/InsertOrUpdate" method="post" enctype="multipart/form-data"><table id="tasktable"><tr><td><label for="">User Photo:</label></td><td><input type="file" name="photo" id="photo" /></td><td></td></tr></table></form>',
+                    buttons: { Back: -1, Ok: 0 },
+                    focus: 1,
+                    submit: function (e, v, m, f) {
+                        if (v == 0) {
+                            $("#upuser").ajaxSubmit({ success:
+                                    function (responseText, statusText, xhr, $form) {
+                                        //$prompt.close();
+                                        if (responseText != "false") {
+                                            var resdata = eval("(" + responseText + ")");
+                                            var currenttr = $("a[title='" + resdata.Id + "']").parents("tr");
+                                            currenttr.children(".tdname").text(f.name);
+                                            currenttr.children(".tdemail").text(f.email);
+                                            currenttr.children(".tdphoto").children("img").attr("src", resdata.Icon);
+                                            $.prompt.close();
+                                        }
+                                        else {
+                                            alert("请选择头像！");
+                                        }
+                                    }
+                            });
+
+                        }
+                        else if (v = -1) {
+                            $.prompt.goToState('state0');
+                        }
+                        return false;
+                    }
+                }
+            };
+            $.prompt(states);
+        }
+        //删除
+        function deleteUser() {
+            var ctr = $(this).parents("tr");
+            $.get("/user/delete?id=" + $(this).attr("title"), function (response) {
+                ctr.remove();
+            })
+        }
+        $(function () {
+            $("#mytable tr:even").css("background-color", "#CAE8EA");
+            //删除
+            $("a[rel='delete']").click(deleteUser);
+            //修改
+            $("a[rel='update']").click(updateUser);
+            //添加
+            $("#adduser").click(function () {
+                var firsthtml = $("#OpenWindow").html();
+                var statesdemo = {
+                    state0: {
+                        html: firsthtml,
+                        buttons: { Next: true },
+                        focus: 1,
+                        top: 300,
+                        submit: function (e, v, m, f) {
+                            if (!v) return true;
+                            else
+                                $.post("/user/InsertOrUpdate", { name: f.name, password: f.password, email: f.email }, function (data) {
+                                    if (data == "true") {
+                                        $.prompt.goToState('state1');
+                                    }
+                                });
+                            return false;
+                        }
+                    },
+                    state1: {
+                        html: '<div id="head" style="margin:0 auto;color:#ff8000;font-family:微软雅黑">选择用户头像</div><hr/><form id="upuser" action="/user/InsertOrUpdate" method="post" enctype="multipart/form-data"><table id="tasktable"><tr><td><label for="">User Photo:</label></td><td><input type="file" name="photo" id="photo" /></td><td></td></tr></table></form>',
+                        buttons: { Back: -1, Ok: 0 },
+                        focus: 1,
+                        top: 300,
+                        submit: function (e, v, m, f) {
+                            if (v == 0) {
+                                $("#upuser").ajaxSubmit({ success:
+                                    function (responseText, statusText, xhr, $form) {
+                                        //$prompt.close();
+                                        if (responseText != "false") {
+                                            var resdata = eval("(" + responseText + ")");
+                                            alert(f.name);
+                                            var trhtml = '<tr><td class="tdname">' + f.name + '</td><td class="tdemail">' + f.email + '</td><td class="tdphoto"><img src="' + resdata.Icon + '" width="30" height="30"/></td><td class="tdupdate"><a href="#" rel="update" title="' + resdata.Id + '">修改</a></td><td class="tddel"><a href="#" rel="delete" title="' + resdata.Id + '">删除</a></td></tr>';
+                                            var tr = $(trhtml);
+                                            tr.children(".tdupdate").children("a").click(updateUser);
+                                            tr.children(".tddel").children("a").click(deleteUser);
+                                            $("#mytable").append(tr);
+                                            $.prompt.close();
+                                        }
+                                        else {
+                                            alert("请选择头像！");
+                                        }
+                                    }
+                                });
+
+                            }
+                            else if (v = -1) {
+                                $.prompt.goToState('state0');
+                            }
+                            return false;
+                        }
+                    }
+                };
+                $.prompt(statesdemo);
+            });
+        });
+    </script>
+}
+<table id="mytable" cellspacing="0"> 
+<caption></caption> 
+<tr> 
+<th scope="col">UserName</th> 
+<th scope="col">Email</th>
+<th scope="col">Photo</th>
+<th colspan="2" scope="col">操作</th>
+</tr>
+@foreach (var item in Model)
+{
+    <tr> 
+        <td class="tdname">@item.Name</td> 
+        <td class="tdemail">@item.Email</td>
+        <td class="tdphoto"><img src="@Url.Content(item.IconUrl)" width="30" height="30"/></td>
+        <td><a href='#' rel="update" title="@item.Id">修改</a></td>
+        <td><a href='#' rel="delete" title="@item.Id">删除</a></td>
+   </tr>
+}
+</table>
+<div id="info">
+    <span class="color4">欢迎您登陆(Admin)：@ViewBag.LoginName</span>
+    <span class="color3"><a href="#" id="adduser">添加用户</a> | @Html.ActionLink("登出", "Logout", "User")</span>
+</div>
+<div id="OpenWindow" style="display:none;text-align:center">
+        <div id="head" style="margin:0 auto;color:#ff8000;font-family:微软雅黑">添加新用户</div>
+        <hr/>
+            <table id="tasktable">
+                <tr>
+                    <td><label for="">User Name:</label></td>
+                    <td><input type="text" name="name" id="name" /></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td><label for="">Password:</label></td>
+                    <td><input type="password" name="password" id="password" /></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td><label for="">Email:</label></td>
+                    <td><input type="text" name="email" id="email" /></td>
+                    <td></td>
+                </tr>
+            </table>
+</div>

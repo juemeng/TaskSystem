@@ -1,0 +1,176 @@
+﻿@model IEnumerable<TaskSystem.Models.DAL.Task>
+@{
+    ViewBag.Title = "任务列表";
+    ViewBag.Message = "任务列表";
+}
+@section scriptadd
+{
+     <script type="text/javascript">
+         function insertOrUpdateTask(actionurl, map, func) {
+             $.post(actionurl,map,func);
+         }
+         function updateTask() {
+                 var data =
+                 {
+                     tdtname: $(this).parents("tr").children(".tdtname").text(),
+                     tdowner: $(this).parents("tr").children(".tdowner").text(),
+                     tddes: $(this).parents("tr").children(".tddes").text(),
+                     tdtime: $(this).parents("tr").children(".tdtime").text(),
+                     taskid: $(this).attr("title")
+                 };
+                 var html = $("#OpenWindow").html();
+                 html = html.replace('id="tname"', "id='tname' value='" + data.tdtname + "'");
+                 html = html.replace('id="owner"', "id='owner' value='" + data.tdowner + "'");
+                 html = html.replace('id="description"', "id='description' value='" + data.tddes + "'");
+                 html = html.replace('id="time"', "id='time' value='" + data.tdtime.replace(" Hour", "") + "'");
+                 $.prompt(html, { top: 300, callback: function (e, v, m, f) {
+                     if (v == true) {
+                         var map = { TaskId: data.taskid, TaskName: f.tname, Owner: f.owner, Description: f.description, Time: f.time };
+                         insertOrUpdateTask("/task/update", map, function (response) {
+                             if (response == "true") {
+                                 var currenttr = $("a[title='" + data.taskid + "']").parents("tr");
+                                 currenttr.children(".tdtname").text(map.TaskName);
+                                 currenttr.children(".tdowner").text(map.Owner);
+                                 currenttr.children(".tddes").attr("title", map.Description);
+                                 map.Description.length > 35 ? currenttr.children(".tddes").text(map.Description.substr(0, 35) + "...") : currenttr.children(".tddes").text(map.Description);
+                                 currenttr.children(".tdtime").text(map.Time + " Hour");
+                             }
+                         });
+                     }
+                 }
+                 });
+             };
+             function deleteTask() {
+                 var ctr = $(this).parents("tr");
+                 $.get("/task/delete", { TaskId: $(this).attr("title") }, function (response) {
+                     if (response == "true") {
+                         ctr.remove();
+                     }
+                 });
+             }
+             function promptCallBack(e, v, m, f) {
+                 if (v == true) {
+                     var selval = m.children("#tasktable").children().children("#trowner").children("#tdowner").children("#selowner").children(":selected").val();
+                             var map = { TaskName: f.tname, Owner: selval, Description: f.description, Time: f.time };
+                             insertOrUpdateTask("/task/add", map, function (data) {
+                                 alert(data);
+                                 if (data != "") {
+                                     var trhtml = "<tr> <td class='tdtname'>" + map.TaskName + "</td><td class='tdowner'><img src='" + data.Icon + "' width='30' height='30' /></td><td class='tddes'";
+                                     if (map.Description.length > 35) {
+                                         trhtml += " title='";
+                                         trhtml += map.Description;
+                                         trhtml += "'>";
+                                         trhtml += map.Description.substr(0, 35);
+                                         trhtml += "</td>"
+                                     }
+                                     else {
+                                         trhtml += " title='";
+                                         trhtml += map.Description;
+                                         trhtml += "'>";
+                                         trhtml += map.Description;
+                                         trhtml += "</td>"
+                                     }
+                                     trhtml += "<td class='tdtime'>" + map.Time + " Hour</td><td class='tdupdate'><a href='#' rel='update' title='" + data + "'>修改</a></td><td class='tddel'><a href='#' rel='delete' title='" + data + "'>删除</a></td></tr>";
+                                     var tr = $(trhtml);
+                                     if ($("#mytable tr").length % 2 == 0) {
+                                         tr.css("background-color", "#CAE8EA");
+                                     }
+                                     tr.height($("#mytable tr").last().height());
+                                     tr.children(".tddes").poshytip({ content: map.Description });
+                                     tr.children(".tdupdate").children("a").click(updateTask);
+                                     tr.children(".tddel").children("a").click(deleteTask);
+                                     $("#mytable").append(tr);
+                                 }
+                                 else {
+                                     alert("添加任务失败！");
+                                 }
+                             });
+                         }
+                     }
+             $(function () {
+                 //新增
+                 $("#addtask").click(function () {
+                     var htmlobj = $("#OpenWindow");
+                     var sel = htmlobj.children("#tasktable").children().children("#trowner").children("#tdowner").children("#selowner");
+                     $.post("/user/UserNameList", function (data) {
+                         $.each(data, function (i, n) {
+                             sel.append($("<option>" + n + "</option>"));
+                         });
+                         $.prompt(htmlobj.html(), { top: 300, callback: promptCallBack });
+                     });
+                 });
+                 //修改
+                 $("a[rel='update']").click(updateTask);
+                 //删除
+                 $("a[rel='delete']").click(deleteTask);
+                 $("#mytable tr:even").css("background-color", "#CAE8EA");
+                 $(".tddes").poshytip();
+             });
+    </script>
+}
+<table id="mytable" cellspacing="0"> 
+<caption></caption> 
+<tr> 
+<th scope="col">Task Name</th> 
+<th scope="col">Owner</th>
+<th scope="col">Description</th>
+<th scope="col">Time</th>
+<th colspan="2" scope="col">操作</th>
+</tr>
+@foreach (var item in Model)
+{
+    <tr> 
+        <td class="tdtname">@item.TaskName</td> 
+        <td class="tdowner"><img src="@Url.Content(item.User.IconUrl)" width="30" height="30"/></td>
+        <td class="tddes" title="@item.Description">
+            @if (item.Description.Length > 35)
+            {
+                @(item.Description.Substring(0, 35) + "....");
+            }
+            else
+            {
+                @item.Description
+            }
+        </td>
+        <td class="tdtime">@item.Time</td>
+        <td><a href='#' rel="update" title="@item.TaskId">修改</a></td>
+        <td><a href='#' rel="delete" title="@item.TaskId">删除</a></td>
+   </tr>
+}
+</table>
+<div id="info">
+@if (ViewBag.IsAdmin)
+{
+    <span class="color4">欢迎您登陆(Admin)：@ViewBag.LoginName</span>
+    <span class="color3">
+        @Html.ActionLink("管理用户", "ShowUser", "User") | <a href="#" id="addtask">添加任务</a> | @Html.ActionLink("登出", "Logout", "User")
+    </span>
+}
+else
+{
+    <span class="color4">欢迎您登陆：@ViewBag.LoginName</span>
+    <span class="color3"><a href="#" id="addtask">添加任务</a> | @Html.ActionLink("登出", "Logout", "User")</span>
+}
+</div>
+<div id="OpenWindow" style="display:none;text-align:center">
+        <div id="head" style="margin:0 auto;color:#ff8000;font-family:微软雅黑">添加新任务</div>
+        <hr/>
+        <table id="tasktable">
+            <tr>
+                <td><label for="">Task Name:</label></td>
+                <td><input type="text" name="tname" id="tname" /></td>
+            </tr>
+            <tr id = "trowner">
+                <td><label for="">Owner:</label></td>
+                <td id="tdowner"><select id="selowner"></select></td>
+            </tr>
+            <tr>
+                <td><label for="">Description:</label></td>
+                <td><input type="text" name="description" id="description" /></td>
+            </tr>
+            <tr>
+                <td><label for="">Time(Hour):</label></td>
+                <td><input type="text" name="time" id="time" /></td>
+            </tr>
+        </table>
+</div>
