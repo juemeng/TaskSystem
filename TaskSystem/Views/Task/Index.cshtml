@@ -110,7 +110,7 @@
                      }
 
                      $(function () {
-                         
+
                          $("#addtask").click(function () {
                              var htmlobj = $("#OpenWindow");
                              var sel = htmlobj.children("#tasktable").children().children("#trowner").children("#tdowner").children("#selowner");
@@ -122,9 +122,9 @@
                                  $.prompt(htmlobj.html(), { top: 300, callback: promptCallBack });
                              });
                          });
-                         
+
                          $("a[rel='update']").click(updateTask);
-                         
+
                          $("a[rel='delete']").click(deleteTask);
                          $("#mytable tr:even").css("background-color", "#CAE8EA");
                          $(".tddes").poshytip();
