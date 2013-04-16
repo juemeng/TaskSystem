@@ -1,11 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using System.Web.Mvc;
+﻿using System.Web.Mvc;
 using System.Web.Routing;
-using System.Data.Entity;
-using TaskSystem.Models.DAL;
+using Castle.Windsor;
+using Castle.Windsor.Installer;
+using TaskSystem.Common.Plumbing;
 
 namespace TaskSystem
 {
@@ -22,6 +19,7 @@ namespace TaskSystem
         public static void RegisterRoutes(RouteCollection routes)
         {
             routes.IgnoreRoute("{resource}.axd/{*pathInfo}");
+            routes.IgnoreRoute("{*favicon}", new { favicon = @"(.*/)?favicon.ico(/.*)?" }); 
 
             routes.MapRoute(
                 "Default", // Route name
@@ -37,6 +35,22 @@ namespace TaskSystem
 
             RegisterGlobalFilters(GlobalFilters.Filters);
             RegisterRoutes(RouteTable.Routes);
+            BootstrapContainer();
+        }
+
+        protected void Application_End()
+        {
+            container.Dispose();
+        }
+
+        private static IWindsorContainer container;
+
+        private static void BootstrapContainer()
+        {
+            container = new WindsorContainer()
+                .Install(FromAssembly.This());
+            var controllerFactory = new WindsorControllerFactory(container.Kernel);
+            ControllerBuilder.Current.SetControllerFactory(controllerFactory);
         }
     }
 }

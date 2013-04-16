@@ -8,12 +8,13 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.ComponentModel;
+using System.Data.EntityClient;
 using System.Data.Objects;
 using System.Data.Objects.DataClasses;
-using System.Data.EntityClient;
-using System.ComponentModel;
-using System.Xml.Serialization;
+using System.Linq;
 using System.Runtime.Serialization;
+using System.Xml.Serialization;
 
 [assembly: EdmSchemaAttribute()]
 #region EDM Relationship Metadata
@@ -103,6 +104,7 @@ namespace TaskSystem.Models.DAL
         private ObjectSet<User> _Users;
 
         #endregion
+
         #region AddTo Methods
     
         /// <summary>
@@ -122,11 +124,11 @@ namespace TaskSystem.Models.DAL
         }
 
         #endregion
+
     }
-    
 
     #endregion
-    
+
     #region Entities
     
     /// <summary>
@@ -151,6 +153,7 @@ namespace TaskSystem.Models.DAL
         }
 
         #endregion
+
         #region Primitive Properties
     
         /// <summary>
@@ -277,6 +280,7 @@ namespace TaskSystem.Models.DAL
         partial void OnOwner_IdChanged();
 
         #endregion
+
     
         #region Navigation Properties
     
@@ -319,6 +323,7 @@ namespace TaskSystem.Models.DAL
         }
 
         #endregion
+
     }
     
     /// <summary>
@@ -345,6 +350,7 @@ namespace TaskSystem.Models.DAL
         }
 
         #endregion
+
         #region Primitive Properties
     
         /// <summary>
@@ -495,6 +501,7 @@ namespace TaskSystem.Models.DAL
         partial void OnIsAdminChanged();
 
         #endregion
+
     
         #region Navigation Properties
     
@@ -521,8 +528,10 @@ namespace TaskSystem.Models.DAL
         }
 
         #endregion
+
     }
 
     #endregion
+
     
 }
